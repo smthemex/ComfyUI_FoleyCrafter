@@ -1,0 +1,297 @@
+{
+  "last_node_id": 58,
+  "last_link_id": 72,
+  "nodes": [
+    {
+      "id": 57,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        1977,
+        -80
+      ],
+      "size": [
+        315,
+        497
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 69
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 70
+        },
+        {
+          "name": "meta_batch",
+          "type": "VHS_BatchManager",
+          "link": null
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": null
+        },
+        {
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "link": 71,
+          "widget": {
+            "name": "frame_rate"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VHS_VideoCombine"
+      },
+      "widgets_values": {
+        "frame_rate": 8,
+        "loop_count": 0,
+        "filename_prefix": "AnimateDiff",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "AnimateDiff_00008-audio.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4",
+            "frame_rate": 24
+          },
+          "muted": false
+        }
+      }
+    },
+    {
+      "id": 45,
+      "type": "FoleyCrafter_LoadModel",
+      "pos": [
+        1289,
+        -82
+      ],
+      "size": {
+        "0": 315,
+        "1": 166
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "pipe",
+          "type": "MODEL",
+          "links": [
+            54
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "vocoder",
+          "type": "MODEL",
+          "links": [
+            52
+          ],
+          "shape": 3,
+          "slot_index": 1
+        },
+        {
+          "name": "time_detector",
+          "type": "MODEL",
+          "links": [
+            55
+          ],
+          "shape": 3,
+          "slot_index": 2
+        },
+        {
+          "name": "image_encoder",
+          "type": "MODEL",
+          "links": [
+            56
+          ],
+          "shape": 3,
+          "slot_index": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FoleyCrafter_LoadModel"
+      },
+      "widgets_values": [
+        "F:/test/ComfyUI/models/diffusers/auffusion/auffusion-full-no-adapter",
+        "F:/test/ComfyUI/models/photomaker",
+        1
+      ]
+    },
+    {
+      "id": 46,
+      "type": "FoleyCrafter_Sampler",
+      "pos": [
+        1648,
+        -84
+      ],
+      "size": {
+        "0": 303.9163513183594,
+        "1": 422.68096923828125
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pipe",
+          "type": "MODEL",
+          "link": 54
+        },
+        {
+          "name": "vocoder",
+          "type": "MODEL",
+          "link": 52
+        },
+        {
+          "name": "time_detector",
+          "type": "MODEL",
+          "link": 55
+        },
+        {
+          "name": "image_encoder",
+          "type": "MODEL",
+          "link": 56
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            69
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            70
+          ],
+          "shape": 3,
+          "slot_index": 1
+        },
+        {
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "links": [
+            71
+          ],
+          "shape": 3,
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FoleyCrafter_Sampler"
+      },
+      "widgets_values": [
+        "case5.mp4",
+        "A women look at a UFO",
+        "bad quality",
+        150,
+        0,
+        0.2,
+        25,
+        1024,
+        256,
+        true
+      ]
+    }
+  ],
+  "links": [
+    [
+      52,
+      45,
+      1,
+      46,
+      1,
+      "MODEL"
+    ],
+    [
+      54,
+      45,
+      0,
+      46,
+      0,
+      "MODEL"
+    ],
+    [
+      55,
+      45,
+      2,
+      46,
+      2,
+      "MODEL"
+    ],
+    [
+      56,
+      45,
+      3,
+      46,
+      3,
+      "MODEL"
+    ],
+    [
+      69,
+      46,
+      0,
+      57,
+      0,
+      "IMAGE"
+    ],
+    [
+      70,
+      46,
+      1,
+      57,
+      1,
+      "AUDIO"
+    ],
+    [
+      71,
+      46,
+      2,
+      57,
+      4,
+      "FLOAT"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.6105100000000012,
+      "offset": [
+        -1160.2642919835728,
+        256.54225031631887
+      ]
+    }
+  },
+  "version": 0.4
+}
