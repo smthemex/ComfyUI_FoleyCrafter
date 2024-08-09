@@ -1,0 +1,15 @@
+[project]
+name = "comfyui_foleycrafter"
+description = "FoleyCrafter is a video-to-audio generation framework which can produce realistic sound effects semantically relevant and synchronized with videos."
+version = "1.0.0"
+license = "LICENSE"
+dependencies = ["#soundfile", "#safetensors", "#moviepy", "#decord", "#imageio", "#h5py"]
+
+[project.urls]
+Repository = "https://github.com/smthemex/ComfyUI_FoleyCrafter"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "smthemex"
+DisplayName = "ComfyUI_FoleyCrafter"
+Icon = ""
