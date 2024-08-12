@@ -1,0 +1,232 @@
+{
+  "last_node_id": 6,
+  "last_link_id": 12,
+  "nodes": [
+    {
+      "id": 5,
+      "type": "FoleyCrafter_Sampler",
+      "pos": [
+        950,
+        596
+      ],
+      "size": [
+        290.6414210178891,
+        367.0819202956643
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "DICT",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            9
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            10
+          ],
+          "shape": 3,
+          "slot_index": 1
+        },
+        {
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "links": [
+            11
+          ],
+          "shape": 3,
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FoleyCrafter_Sampler"
+      },
+      "widgets_values": [
+        "1234.mp4",
+        "1 girl",
+        "bad quality",
+        150,
+        0,
+        0.2,
+        25,
+        1024,
+        256,
+        false
+      ]
+    },
+    {
+      "id": 3,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        1276,
+        594
+      ],
+      "size": [
+        315,
+        615
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 9
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 10
+        },
+        {
+          "name": "meta_batch",
+          "type": "VHS_BatchManager",
+          "link": null
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": null
+        },
+        {
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "link": 11,
+          "widget": {
+            "name": "frame_rate"
+          },
+          "slot_index": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VHS_VideoCombine"
+      },
+      "widgets_values": {
+        "frame_rate": 8,
+        "loop_count": 0,
+        "filename_prefix": "AnimateDiff",
+        "format": "video/h264-mp4",
+        "pix_fmt": "yuv420p",
+        "crf": 19,
+        "save_metadata": true,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "AnimateDiff_00009-audio.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/h264-mp4",
+            "frame_rate": 30
+          },
+          "muted": false
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "FoleyCrafter_LoadModel",
+      "pos": [
+        586,
+        611
+      ],
+      "size": {
+        "0": 315,
+        "1": 106
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "model",
+          "type": "DICT",
+          "links": [
+            12
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FoleyCrafter_LoadModel"
+      },
+      "widgets_values": [
+        "auffusion/auffusion-full-no-adapter",
+        "h94/IP-Adapter",
+        1
+      ]
+    }
+  ],
+  "links": [
+    [
+      9,
+      5,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      10,
+      5,
+      1,
+      3,
+      1,
+      "AUDIO"
+    ],
+    [
+      11,
+      5,
+      2,
+      3,
+      4,
+      "FLOAT"
+    ],
+    [
+      12,
+      6,
+      0,
+      5,
+      0,
+      "DICT"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.2100000000000002,
+      "offset": [
+        -435.5174540757406,
+        -471.84225087417684
+      ]
+    }
+  },
+  "version": 0.4
+}
