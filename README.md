@@ -3,6 +3,12 @@ FoleyCrafter is a video-to-audio generation framework which can produce realisti
 
 FoleyCrafter  From: [FoleyCrafter](https://github.com/open-mmlab/FoleyCrafter)
 
+Update
+---
+2024/08/22  
+--修复clip关闭的错误；节点改成字典，避免太多线了，运行离线模型失败的，请看3.2和3.3内容；   
+--Fix the error of closing clip; Change the node to a dictionary to avoid too many lines. If the offline model fails to run, please refer to sections 3.2 and 3.3；  
+
 1.Installation
 -----
   In the ./ComfyUI /custom_node directory, run the following:   
@@ -43,20 +49,22 @@ Download all and store them in the "ComfyUI/models/foleycrafter folder" accordin
     └── timestamp_detector.pth.tar
 ```
 3.2  
-"h94/IP-Adapter" [link](https://huggingface.co/h94/IP-Adapter/tree/main/models/image_encoder),
-离线使用时，部分下载，文件结构如下,联外网会自动下载，if offline, Partial download, file structure as follows，online will auto download：   
+online,fill "h94/IP-Adapter" [link](https://huggingface.co/h94/IP-Adapter/tree/main/models/image_encoder),
+离线使用时，部分下载，文件结构如下,联外网会自动下载，if offline, Partial download, file structure as follows，online will auto download：
+离线使用时，只需要填写：any_path 。。。。 When used offline, only need to fill in： any_path；   
+虽然是随意地址，但是模型存放路径必须是models/image_encoder/（模型文件）；
 ```
-└── any_path/h94/IP-Adapter/models/
-    ├── image_encoder
+└── any_path
+    ├── models/image_encoder
     │   ├── model.safetensors
     │   ├── config.json
-
 ```
 3.3  
 "auffusion/auffusion-full-no-adapter" [link](https://huggingface.co/auffusion/auffusion-full-no-adapter/tree/main),
 离线使用时，部分下载，文件结构如下,联外网会自动下载，if offline, Partial download, file structure as follows，online will auto download：   
+离线使用时，只需要填写：any_path/auffusion/auffusion-full-no-adapter 。。。When used offline, only need to fill in：any_path/auffusion/auffusion-full-no-adapter；   
 ```
-├── any_path/auffusion/auffusion-full-no-adapter/
+├── any_path/auffusion/auffusion-full-no-adapter
 |      ├──model_index.json
 |      ├──vae
 |          ├── config.json
@@ -83,7 +91,7 @@ Download all and store them in the "ComfyUI/models/foleycrafter folder" accordin
 4 Example
 ----
 video_dubbing using prompt an uprompt (Latest version)        
-![](https://github.com/smthemex/ComfyUI_FoleyCrafter/blob/main/example/example.png)
+![](https://github.com/smthemex/ComfyUI_FoleyCrafter/blob/main/example/new.png)
 
 
 5 Function Description of Nodes  
