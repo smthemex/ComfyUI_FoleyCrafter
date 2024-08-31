@@ -134,7 +134,7 @@ class IPAdapterMixin:
         # Load the main state dict first.
         cache_dir = kwargs.pop("cache_dir", None)
         force_download = kwargs.pop("force_download", False)
-        resume_download = kwargs.pop("resume_download", False)
+        #resume_download = kwargs.pop("resume_download", False)
         proxies = kwargs.pop("proxies", None)
         local_files_only = kwargs.pop("local_files_only", None)
         token = kwargs.pop("token", None)
@@ -170,14 +170,13 @@ class IPAdapterMixin:
                     weights_name=weight_name,
                     cache_dir=cache_dir,
                     force_download=force_download,
-                    resume_download=resume_download,
                     proxies=proxies,
                     local_files_only=local_files_only,
                     token=token,
                     revision=revision,
                     subfolder=subfolder,
                     user_agent=user_agent,
-                )
+                )#resume_download=resume_download,
                 if weight_name.endswith(".safetensors"):
                     state_dict = {"image_proj": {}, "ip_adapter": {}}
                     with safe_open(model_file, framework="pt", device="cpu") as f:
@@ -372,7 +371,7 @@ class VPAdapterMixin:
         # Load the main state dict first.
         cache_dir = kwargs.pop("cache_dir", None)
         force_download = kwargs.pop("force_download", False)
-        resume_download = kwargs.pop("resume_download", False)
+        #resume_download = kwargs.pop("resume_download", False)
         proxies = kwargs.pop("proxies", None)
         local_files_only = kwargs.pop("local_files_only", None)
         token = kwargs.pop("token", None)
@@ -408,14 +407,13 @@ class VPAdapterMixin:
                     weights_name=weight_name,
                     cache_dir=cache_dir,
                     force_download=force_download,
-                    resume_download=resume_download,
                     proxies=proxies,
                     local_files_only=local_files_only,
                     token=token,
                     revision=revision,
                     subfolder=subfolder,
                     user_agent=user_agent,
-                )
+                )#resume_download=resume_download,
                 if weight_name.endswith(".safetensors"):
                     state_dict = {"image_proj": {}, "ip_adapter": {}}
                     with safe_open(model_file, framework="pt", device="cpu") as f:
