@@ -260,7 +260,7 @@ class FoleyCrafter_Sampler:
             frames, duration,frames_list = read_frames_with_moviepy(video_files, max_frame_nums=max_frame)
             print(f" >>> {video_files} 's duration is {duration} <<< ")
             # from https://github.com/phr00t/ComfyUI_FoleyCrafter @phr00t
-            if skip_timesync:
+            if not skip_timesync:
                 print(f" >>>Begin timesync function,run_inference individual frames read... <<< ")
                 time_frames = torch.FloatTensor(frames).permute(0, 3, 1, 2)
                 time_frames = video_transform(time_frames)
