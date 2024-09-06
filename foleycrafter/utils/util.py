@@ -1697,11 +1697,14 @@ def read_frames_with_moviepy(video_path, max_frame_nums=None):
         frames.append(frame)
     if max_frame_nums is not None:
         frames_idx = np.linspace(0, len(frames) - 1, max_frame_nums, dtype=int)
+        frames_=np.array(frames)[frames_idx, ...]
+    else:
+        frames_=np.array(frames)
     try:
        clip.close()
     except:
         pass
-    return np.array(frames)[frames_idx, ...], duration,frames
+    return frames_, duration,frames
 
 
 def read_frames_with_moviepy_resample(video_path, save_path):
