@@ -197,15 +197,16 @@ class FoleyCrafter_LoadModel:
             }
         }
 
-    RETURN_TYPES = ("MODEL","MODEL","MODEL","MODEL",)
-    RETURN_NAMES = ("pipe","vocoder","time_detector","image_encoder",)
+    RETURN_TYPES = ("DICT",)
+    RETURN_NAMES = ("model",)
     FUNCTION = "main_loader"
     CATEGORY = "FoleyCrafter"
 
     def main_loader(self,repo_id,ip_repo,semantic_scale):
         pipe, vocoder, time_detector=build_models(repo_id, device, semantic_scale)
         image_encoder = CLIPVisionModelWithProjection.from_pretrained(ip_repo, subfolder="models/image_encoder").to(device)
-        return (pipe,vocoder, time_detector,image_encoder,)
+        model={"pipe":pipe,"vocoder":vocoder,"time_detector":time_detector,"image_encoder":image_encoder,}
+        return (model,)
 
 
 class FoleyCrafter_Sampler:
@@ -216,20 +217,19 @@ class FoleyCrafter_Sampler:
                        os.path.isfile(os.path.join(input_path, f)) and f.split('.')[-1] in ['webm', 'mp4', 'mkv','gif']]
         return {
             "required": {
-                "pipe": ("MODEL",),
-                "vocoder": ("MODEL",),
-                "time_detector": ("MODEL",),
-                "image_encoder": ("MODEL",),
+                "model": ("DICT",),
                 "video_files": (["none"] + video_files,),
                 "prompt": ("STRING", {"multiline": True,"default": "1 girl"}),
                 "negative_prompt": ("STRING", {"multiline": True,"default": "bad quality"}),
-                "max_frame": ("INT", {"default": 150, "min": 64, "step": 1,"max": 500}),
-                "seeds": ("INT", {"default": 0, "min": 0, "max": 10000}),
+                "max_frame": ("INT", {"default": 50, "min": 0, "step": 1,"max": 500}),
+                "seed": ("INT", {"default": 42, "min": 0, "max": MAX_SEED}),
                 "controlnet_scale": ("FLOAT", {"default": 0.2, "min": 0.0, "max": 1.0, "step": 0.1, "round": 0.01}),
                 "steps": ("INT", {"default": 25, "min": 1, "max": 100}),
                 "sample_width": ("INT", {"default": 1024, "min": 128, "max": 1024, "step": 64, "display": "number"}),
                 "sample_height": ("INT", {"default": 256, "min": 128, "max": 1024, "step": 64, "display": "number"}),
-                "video_dubbing": ("BOOLEAN", {"default": False},), }
+                "video_dubbing": ("BOOLEAN", {"default": False},),
+                "skip_timesync": ("BOOLEAN", {"default": False},)
+            }
         }
     
     RETURN_TYPES = ("IMAGE", "AUDIO", "FLOAT")
@@ -237,10 +237,11 @@ class FoleyCrafter_Sampler:
     FUNCTION = "fc_main"
     CATEGORY = "FoleyCrafter"
     
-    def run_inference(self,pipe, vocoder, time_detector,controlnet_scale,seeds,image_encoder,video_files,max_frame,prompt,negative_prompt,steps,width,height,video_dubbing):
-
+    def run_inference(self,pipe, vocoder, time_detector,controlnet_scale,seed,image_encoder,video_files,max_frame,prompt,negative_prompt,steps,width,height,video_dubbing,skip_timesync):
+       
+        
         generator = torch.Generator(device=device)
-        generator.manual_seed(seeds)
+        generator.manual_seed(seed)
         image_processor = CLIPImageProcessor()
 
         source_video = cv2.VideoCapture(video_files)
@@ -248,24 +249,35 @@ class FoleyCrafter_Sampler:
         v_width = int(source_video.get(cv2.CAP_PROP_FRAME_WIDTH))  # 获取视频的fps w h
         v_height = int(source_video.get(cv2.CAP_PROP_FRAME_HEIGHT))
         source_video.release()
+        print(f" >>> {video_files} 's fps is {fps},width is {v_width} ,width is {v_height}  <<< ")
         
+        if max_frame == 0:  # If zero is selected, all frames are obtained
+            max_frame = None
+        elif max_frame == 1:
+            max_frame = int(fps)
         with torch.no_grad():
-            print(f" >>> Begin Inference: {video_files} <<< ")
+            print(f" >>> Begin Inference: {video_files},Decoding images takes a long time, please be patient and wait! <<< ")
             frames, duration,frames_list = read_frames_with_moviepy(video_files, max_frame_nums=max_frame)
-            
-            time_frames = torch.FloatTensor(frames).permute(0, 3, 1, 2)
-            time_frames = video_transform(time_frames)
-            time_frames = {"frames": time_frames.unsqueeze(0).permute(0, 2, 1, 3, 4)}
-            preds = time_detector(time_frames)
-            preds = torch.sigmoid(preds)
-            
-            # duration
-            # import ipdb; ipdb.set_trace()
-            time_condition = [
-                -1 if preds[0][int(i / (1024 / 10 * duration) * 150)] < 0.5 else 1
-                for i in range(int(1024 / 10 * duration))
-            ]
-            time_condition = time_condition + [-1] * (1024 - len(time_condition))
+            print(f" >>> {video_files} 's duration is {duration} <<< ")
+            # from https://github.com/phr00t/ComfyUI_FoleyCrafter @phr00t
+            if skip_timesync:
+                print(f" >>>Begin timesync function,run_inference individual frames read... <<< ")
+                time_frames = torch.FloatTensor(frames).permute(0, 3, 1, 2)
+                time_frames = video_transform(time_frames)
+                time_frames = {"frames": time_frames.unsqueeze(0).permute(0, 2, 1, 3, 4)}
+                preds = time_detector(time_frames)
+                preds = torch.sigmoid(preds)
+                # duration
+                # import ipdb; ipdb.set_trace()
+                if not max_frame:
+                    max_frame=int(fps*duration)
+                time_condition = [
+                    -1 if preds[0][int(i / (1024 / 10 * duration) * max_frame)] < 0.5 else 1
+                    for i in range(int(1024 / 10 * duration))
+                ]
+                time_condition = time_condition + [-1] * (1024 - len(time_condition))
+            else:
+                time_condition = np.full(1024, -1)
             # w -> b c h w
             time_condition = (
                 torch.FloatTensor(time_condition)
@@ -275,12 +287,17 @@ class FoleyCrafter_Sampler:
                 .repeat(1, 1, 256, 1)
                 .to("cuda")
             )
+            print(f" >>> Time_condition is done.. <<< ")
+            
+            print(f" >>>Begin image_processor,run_embeddings individual frames read... <<< ")
             images = image_processor(images=frames, return_tensors="pt").to(device)
             image_embeddings = image_encoder(**images).image_embeds
             image_embeddings = torch.mean(image_embeddings, dim=0, keepdim=True).unsqueeze(0).unsqueeze(0)
             neg_image_embeddings = torch.zeros_like(image_embeddings)
             image_embeddings = torch.cat([neg_image_embeddings, image_embeddings], dim=1)
+            print(f" >>> image_processor is done.. <<< ")
             
+            print(f" >>>Begin sample... <<< ")
             sample = pipe(
                 prompt=prompt,
                 negative_prompt=negative_prompt,
@@ -312,6 +329,7 @@ class FoleyCrafter_Sampler:
             
             if video_dubbing:
                 output_video_path = os.path.join(folder_paths.output_directory, f"{rand_file_prefix}_audio.mp4")
+                print(f" >>>Begin video_dubbing,video save in {output_video_path}... <<< ")
                 video_clip = VideoFileClip(video_files)
                 audio_clip = AudioFileClip(save_path)
                 final_clip = video_clip.set_audio(audio_clip)
@@ -326,10 +344,14 @@ class FoleyCrafter_Sampler:
             return frames_list, audio_output, fps,v_width,v_height
     
             
-    def fc_main(self, pipe, vocoder, time_detector,image_encoder,video_files, prompt,negative_prompt, seeds,max_frame,controlnet_scale, steps,sample_width,sample_height, video_dubbing, ):
+    def fc_main(self,model, video_files, prompt,negative_prompt, seed,max_frame,controlnet_scale, steps,sample_width,sample_height, video_dubbing,skip_timesync ):
+        pipe = model.get("pipe")
+        vocoder = model.get("vocoder")
+        time_detector = model.get("time_detector")
+        image_encoder=model.get("image_encoder")
         if video_files != "none":
             video_files=osp.join(folder_paths.input_directory, video_files)
-            images,audio,fps,v_width,v_height=self.run_inference( pipe, vocoder, time_detector,controlnet_scale,seeds,image_encoder,video_files,max_frame,prompt,negative_prompt,steps,sample_width,sample_height,video_dubbing)
+            images,audio,fps,v_width,v_height=self.run_inference( pipe, vocoder, time_detector,controlnet_scale,seed,image_encoder,video_files,max_frame,prompt,negative_prompt,steps,sample_width,sample_height,video_dubbing,skip_timesync)
         else:
             raise "need video file"
         frame_rate=float(fps)
